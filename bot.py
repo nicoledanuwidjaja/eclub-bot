@@ -8,18 +8,19 @@ from webdriver_manager.chrome import ChromeDriverManager
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
+# secret secret
 USERNAME = os.environ.get("USERNAME")
 PASSWORD = os.environ.get("PASSWORD")
 
 # store follower username and name
-followers = {}
-
+followers = {'rachna.lewis' : 'Rachna Lewis', 'krisp_thins' : 'Kristin', 'stegosaurusuuuuu' : 'Vera', 'liindazeng' : ''}
 
 class FeedPage:
     def __init__(self, browser):
         self.browser = browser
         self.browser.get('https://www.instagram.com/neu_eclub')
 
+    # stores list of eclub followers in dictionary
     def collect_followers(self):
         browser.find_element_by_xpath('//a[contains(@href, "%s")]' % "followers").click()
         element = browser.find_element_by_xpath('//*[@id="react-root"]/section/main/div/header/section/ul/li[2]/a')
@@ -45,21 +46,28 @@ class FeedPage:
         # get rid of notifications popup
         browser.find_element_by_xpath('/html/body/div[5]/div/div/div/div[3]/button[2]').click()
 
-        for username, name in followers:
-            first_name = name.split()[0]
+        for username, name in followers.items():
+            browser.get('https://www.instagram.com/direct/new/')
+            sleep(2)
+            first_name = name.split()[0] if name else 'there'
             template = "Hey {name}! I hope you're having a wonderful week.\n" \
                       "I just wanted to let you know that Demo Day - Northeastern's largest celebration of student " \
                       "entrepreneurship and innovation - is this Wednesday, November 18th, from 6-8:15pm EST. We would LOVE to see you there!\n" \
-                      "We will have 12 of our Husky Startup Challenge startups compete for cash prizes in front of " \
+                      "You'll meet the Husky Startup Challenge's top 12 startups compete for cash prizes in front of " \
                       "hundreds of people.\n" \
                       " You can sign up here:\n" \
-                      " https://app.hopin.com/events/demo-day-b0f55d32-3337-42aa-94d4-a4fb812b7187\n" \
-                      " Feel free to let us know if you have any questions!".format(name=first_name)
+                      " https://tinyurl.com/demodayfall2020\n" \
+                      " Feel free to let us know if you have any questions!\n".format(name=first_name)
             print(first_name)
             recipient = self.browser.find_element_by_css_selector("input[name='queryBox']")
-            recipient.send_keys('thenickyflash')
-            browser.find_element_by_xpath('/html/body/div[2]/div/div/div[2]/div[2]/div/div/div[2]/div/').click()
+            recipient.send_keys(username)
+            browser.find_element_by_xpath('/html/body/div[2]/div/div/div[2]/div[2]/div/div/div[3]/button').click()
             browser.find_element_by_xpath('/html/body/div[2]/div/div/div/div/div[2]').click()
+            sleep(3)
+            # input message
+            message_input = self.browser.find_element_by_css_selector("textarea")
+            message_input.send_keys(template)
+            sleep(5)
 
 
 class LoginPage:
@@ -85,7 +93,7 @@ class HomePage:
         return LoginPage(self.browser)
 
 
-def test_login_page(browser):
+def init(browser):
     home_page = HomePage(browser)
     login_page = home_page.go_to_login_page()
     login_page.login(USERNAME, PASSWORD)
@@ -97,8 +105,8 @@ def test_login_page(browser):
     assert len(errors) == 0
 
 
-# init browser
+# start bot
 browser = webdriver.Chrome(ChromeDriverManager().install())
 browser.implicitly_wait(5)
-test_login_page(browser)
+init(browser)
 # browser.close()
