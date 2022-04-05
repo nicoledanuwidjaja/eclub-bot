@@ -5,6 +5,7 @@ from time import sleep
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.by import By
 
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
@@ -12,9 +13,6 @@ load_dotenv(dotenv_path)
 # secret secret
 USERNAME = os.environ.get("USERNAME")
 PASSWORD = os.environ.get("PASSWORD")
-
-# store follower username and name
-followers = {}
 
 class FeedPage:
     def __init__(self, browser):
@@ -54,28 +52,30 @@ class FeedPage:
         browser.get('https://www.instagram.com/direct/new/')
         sleep(2)
 
-        # get rid of notifications popup
-        browser.find_element_by_xpath('/html/body/div[5]/div/div/div/div[3]/button[2]').click()
+        # get rid of notifications popup manually 
+        # browser.find_element_by_xpath('/html/body/div[5]/div/div/div/div[3]/button[2]').click()
 
         for username, name in followers.items():
             browser.get('https://www.instagram.com/direct/new/')
+            print(username)
             sleep(3)
             first_name = name.split()[0] if name else 'there'
             template = "Hey {name}! Just wanted to let you know that Demo Day - Northeastern's largest celebration of student " \
-                      "entrepreneurship and innovation - is this Wednesday, November 18th, from 6-8:15pm EST. We would LOVE to see you there!\n" \
+                      "entrepreneurship and innovation - is this Wednesday, April 6th, from 6-8:30pm EST. We would LOVE to see you there!\n" \
                       "You'll see the Husky Startup Challenge's top 12 startups compete for cash prizes in front of " \
                       "hundreds of people.\n" \
                       " You can sign up here:\n" \
-                      " https://tinyurl.com/demodayfall2020\n".format(name=first_name)
+                      " https://tinyurl.com/demoday-spring2022\n".format(name=first_name)
             print(first_name)
-            recipient = self.browser.find_element_by_css_selector("input[name='queryBox']")
+            recipient = browser.find_element(By.CSS_SELECTOR, value="input[name='queryBox']")
             recipient.send_keys(username)
-            browser.find_element_by_xpath('/html/body/div[2]/div/div/div[2]/div[2]/div/div/div[3]/button').click()
-            browser.find_element_by_xpath('/html/body/div[2]/div/div/div/div/div[2]').click()
-            sleep(1)
+            sleep(2)
+            browser.find_element(By.XPATH, value='/html/body/div[2]/div/div/div[2]/div[2]/div/div/div[3]/button').click()
+            browser.find_element(By.XPATH, value='/html/body/div[2]/div/div/div/div/div[3]/div/button').click()
             # input message
             try:
-                message_input = self.browser.find_element_by_css_selector("textarea")
+                print("HELLO")
+                message_input = browser.find_element(By.CSS_SELECTOR, value="textarea")
                 message_input.send_keys(template)
                 sleep(4)
             except NoSuchElementException:
@@ -114,7 +114,7 @@ def init(browser):
     feed_page.collect_followers()
     feed_page.send_messages()
 
-    errors = browser.find_elements_by_css_selector('#error_message')
+    errors = browser.find_elements(By.CSS_SELECTOR, '#error_message')
     assert len(errors) == 0
 
 
